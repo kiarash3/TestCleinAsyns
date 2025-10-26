@@ -1,0 +1,54 @@
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace TestCleintAsyns
+{
+    public partial class MainWindow : Window
+    {
+        private int _localOperationCounter = 0;
+        private int _webApiOperationCounter = 0;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void ListAddItem(string text)
+        {
+            ListViewItem item = new ListViewItem();
+            item.Content = text;
+            ListViewOutput.Items.Add(item);
+        }
+
+        private void BtnLocalOperation_Click(object sender, RoutedEventArgs e)
+        {
+            _localOperationCounter++;
+            ListAddItem($"Local operation completed ({_localOperationCounter})");
+        }
+
+        private async void BtnWebApiCall_Click(object sender, RoutedEventArgs e)
+        {
+            _webApiOperationCounter++;
+            ListAddItem("Calling Web API...");
+
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    // آدرس پروژه‌ی Rider خودت رو اینجا بگذار
+                    HttpResponseMessage response = await httpClient.GetAsync("http://localhost:5236/TestLongOperation");
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    ListAddItem($"{result} ({_webApiOperationCounter})");
+                }
+            }
+            catch (Exception ex)
+            {
+                ListAddItem($"Error: {ex.Message}");
+            }
+        }
+    }
+}
